@@ -128,3 +128,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+restboty-form/miapp/miapp/__pycache__/__init__.cpython-38.pyc
+__pycache__/
+migrations/
+
+*.pyc
