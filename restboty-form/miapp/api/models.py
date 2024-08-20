@@ -36,10 +36,12 @@ class LabelTrain(EmbeddedDocument):
     start=IntField(required=True)
     end=IntField(required=True)
     label=StringField(required=True)
+    position_array=ListField(IntField(),default=list)
 
 class TrainData(Document):
     context=StringField(required=True)
     text=StringField(required=True)
     labels=ListField(EmbeddedDocumentField(LabelTrain),default=list)
+
 
 

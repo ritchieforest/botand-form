@@ -68,6 +68,7 @@ for aux in schemasByContest:
         listDataCreate["text"] = auxDes
 
         # Función auxiliar para encontrar y manejar índices
+ 
         def safe_index(phrase, substring):
             try:
                 return phrase.index(substring)
@@ -86,6 +87,8 @@ for aux in schemasByContest:
         ]
 
         # Agrega las etiquetas a la lista
+        list_arr=auxDesAux.replace(",",'').split(" ")
+        print(list_arr)
         for placeholder, value, label,index in labels_config:
             start_index = safe_index(auxDesAux, placeholder)
             indice="{"+str(index)+"}"
@@ -94,7 +97,8 @@ for aux in schemasByContest:
                 listDataCreate["labels"].append({
                     "end": start_index + 2 + len(value),
                     "start": start_index + 1,
-                    "label": label
+                    "label": label,
+                    "position_array":[safe_index(list_arr,indice),len(value.split(" "))]
                 })
         print(listDataCreate)
         print("#####################################")
