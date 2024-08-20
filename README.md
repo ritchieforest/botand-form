@@ -64,11 +64,10 @@ El modelo general de la base de datos es asi:
         }
     ]
 }
+```
 
-
-## Funcionalidad
 **botand-form** generará un JSON como:
-    ![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
+![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
 ```json
 {
   "producto": "AFINADOR CROMATICO PINZA MCT6",
