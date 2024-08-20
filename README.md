@@ -14,8 +14,20 @@
 Dado un texto como: Me gustaria añadir un producto AFINADOR CROMATICO PINZA MCT6 de categoria MAGMA, que tenga el precio 5909.3 y el proveedor sea ALEYMAR, con un stock 383, con un codigo de proveedor 20 y el codigo interno para el producto 120500 para la marca MAGMA
 
 
+## Funcionalidad
+
+El modelo general de la base de datos es asi:
+
+- **Context**: La tabla context va a albergar los diferentes tipos de formulario que se van a procesar, ya sea para añadir productos, pacientes, añadir evoluciones, etc...
+
+- **LabelByContext**: la tabla va a albergar todas las etiquetas o dicho de otra forma todos los campos que van a corresponder a la tabla, la misma esta relacionada al contexto...
+
+*Relacion Context y LabelByContext 1-M*
+
+
+
 **botand-form** generará un JSON como:
-![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
+    ![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
 ```json
 {
   "producto": "AFINADOR CROMATICO PINZA MCT6",
