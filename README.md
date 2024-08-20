@@ -27,6 +27,7 @@ Dado un texto como: Me gustaria añadir un producto AFINADOR CROMATICO PINZA MCT
   "codigo_interno":"120500",
   "marca":"MAGMA"
 }
+```json
 ![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
 
 
