@@ -2,35 +2,11 @@
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Context, Label,TrainData,LabelTrain,SchemeByContext
-from .serializers import TrainDataSerializer,ContextSerializer, LabelSerializer,SchemeByContextSerializer
-
-
-class TrainDataViewSet(viewsets.ViewSet):
-    def list(self, request):
-        queryset = TrainData.objects.all()
-        serializer = TrainDataSerializer(queryset, many=True)
-        return Response(serializer.data)
-    def create(self, request):
-        serializer = TrainDataSerializer(data=request.data)
-        if serializer.is_valid():
-            labels_data = serializer.validated_data['labels']
-
-            # Crear una lista de objetos LabelTrain
-            labels = [LabelTrain(**label_data) for label_data in labels_data]
-
-            # Crear y guardar el documento TrainData
-            contexto = TrainData(
-                context=serializer.validated_data['context'],
-                text=serializer.validated_data['text'],
-                labels=labels
-            )
-            contexto.save()
-
-            # Retornar la respuesta con los datos serializados
-            return Response(TrainDataSerializer(contexto).data)
-        
-        return Response(serializer.errors, status=400)
+from .models import Context, LabelByContext,SchemeByContext,LabelsRefs
+from .serializers import ContextSerializer, LabelSerializer,SchemeByContextSerializer
+from rest_framework.decorators import action
+from rest_framework import status
+from .utils import TextComparer
 
 class SchemeByContextViewSet(viewsets.ViewSet):
     def list(self, request):
@@ -40,15 +16,37 @@ class SchemeByContextViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = SchemeByContextSerializer(data=request.data)
         if serializer.is_valid():
+            labels_data = serializer.validated_data['labels']
+            # Crear una lista de objetos LabelTrain
+            labels = [LabelsRefs(**label_data) for label_data in labels_data]
             contexto = SchemeByContext(
                 descripcion=serializer.validated_data.get('descripcion', ''),
                 contexto=serializer.validated_data.get('contexto', ''),
-
+                labels=labels
             )
             contexto.save()
             return Response(SchemeByContextSerializer(contexto).data)
         return Response(serializer.errors, status=400)
 
+class StringProcessorViewSet(viewsets.ViewSet):
+ 
+    @action(detail=False, methods=['POST'])
+    def process(self, request):
+        # Obtener la cadena del cuerpo de la solicitud POST
+        textCom=TextComparer()
+        cadena = request.data.get('text', '')
+        contexto=request.data.get("contexto",'')
+        context_ids = Context.objects(nombre=contexto).only('id')
+        resultados = SchemeByContext.objects(contexto__in=context_ids)
+        response=textCom.calculate_similarity_arr(textComparer=cadena,textArr=resultados)
+        
+        # Iterar sobre los resultados
+        if cadena:
+            # Procesar la cadena (por ejemplo, convertirla a mayúsculas)
+            processed_string = cadena.upper()
+            return Response({"text": processed_string,"response_form":response,"contexto":contexto}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No se proporcionó ninguna cadena."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContextViewSet(viewsets.ViewSet):
@@ -88,12 +86,12 @@ class ContextViewSet(viewsets.ViewSet):
 
 class LabelViewSet(viewsets.ViewSet):
     def list(self, request):
-        queryset = Label.objects.all()
+        queryset = LabelByContext.objects.all()
         serializer = LabelSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        etiqueta = Label.objects(pk=pk).first()
+        etiqueta = LabelByContext.objects(pk=pk).first()
         serializer = LabelSerializer(etiqueta)
         return Response(serializer.data)
 
@@ -105,7 +103,7 @@ class LabelViewSet(viewsets.ViewSet):
 
         serializer = LabelSerializer(data=request.data)
         if serializer.is_valid():
-            etiqueta = Label(
+            etiqueta = LabelByContext(
                 nombre=serializer.validated_data['nombre'],
                 descripcion=serializer.validated_data.get('descripcion', ''),
                 contexto=contexto
@@ -115,7 +113,7 @@ class LabelViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=400)
 
     def update(self, request, pk=None):
-        etiqueta = Label.objects(pk=pk).first()
+        etiqueta = LabelSerializer.objects(pk=pk).first()
         contexto_id = request.data.get('contexto')
         contexto = Context.objects(pk=contexto_id).first()
         if not contexto:
@@ -131,6 +129,6 @@ class LabelViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=400)
 
     def destroy(self, request, pk=None):
-        etiqueta = Label.objects(pk=pk).first()
+        etiqueta = LabelByContext.objects(pk=pk).first()
         etiqueta.delete()
         return Response(status=204)
