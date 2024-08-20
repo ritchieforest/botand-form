@@ -24,7 +24,7 @@ El modelo general de la base de datos es asi:
 
 *Relacion Context y LabelByContext 1-M*
 
--**SchemeByContext**: La tabla va a guardar todos los esquemas y formas en la que el usuario va a poder encarar la carga desde el front-end con microfono...
+- **SchemeByContext**: La tabla va a guardar todos los esquemas y formas en la que el usuario va a poder encarar la carga desde el front-end con microfono...
 ```json
 {
     "descripcion": "Me gustaria añadir un producto {0} de categoria {1}, que tenga el precio {2} y el proveedor sea {3}, con un stock {4}, con un codigo de proveedor {5} y el codigo interno para el producto {6} para la marca {7}",
@@ -65,7 +65,49 @@ El modelo general de la base de datos es asi:
     ]
 }
 ```
+# Algoritmo Python
 
+Para python utilice la libreria diff para saber el porcentaje de coincidencias que tiene con respecto a lo guardado en la base 
+```python
+def calculate_similarity(self,text1, text2):
+    # Tokenizar los textos en palabras
+    tokens1 = text1.split()
+    tokens2 = text2.split()
+
+    # Crear un comparador de secuencias
+    matcher = difflib.SequenceMatcher(None, tokens1, tokens2)
+
+    # Calcular el ratio de similitud
+    similarity_ratio = matcher.ratio()
+
+    # Convertir el ratio a un porcentaje
+    similarity_percentage = similarity_ratio * 100
+
+    return similarity_percentage
+
+```
+
+Una vez que tengo esto, agrupo las diferencias por el indice del esquema que presenta en la base obteniendo un resultado 
+*{"{0}":["afinador","CROMATICO","PINZA","MCT6"]}*
+```python
+ def group_differences(self,diff):
+        """
+        Agrupa las diferencias en pares, donde cada línea añadida se agrupa con las líneas eliminadas subsecuentes.
+        """
+        grouped_diffs = {}
+        current_group = []
+        auxPos=""
+        for line in diff:
+            if line.startswith('-'):
+                auxPos=line[2:]
+                grouped_diffs[auxPos]=[]
+            elif line.startswith('+'):
+                grouped_diffs[auxPos].append(line[2:])
+ 
+        return grouped_diffs
+
+```
+y de ahi solamente falta ordenar para obtener como resultado lo que esta en frente
 **botand-form** generará un JSON como:
 ![Imagen de Ejemplo botand-form](./ejemplo.jpeg)
 ```json
@@ -79,7 +121,7 @@ El modelo general de la base de datos es asi:
   "codigo_interno":"120500",
   "marca":"MAGMA"
 }
-
+```
 
 
 
